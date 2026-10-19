@@ -14,9 +14,9 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -33,6 +33,20 @@ jobs:
           fi
 
       - run: npx electron-vite build
+
+      # electron-builder uploads files in parallel; if no release exists yet, each upload can create
+      # its own draft. Create the one draft first so every file lands in it.
+      - name: Create the draft release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing=$(gh api "repos/$GITHUB_REPOSITORY/releases" -q ".[] | select(.tag_name == \"$GITHUB_REF_NAME\") | .id")
+          if [ -z "$existing" ]; then
+            gh release create "$GITHUB_REF_NAME" --draft --title "${GITHUB_REF_NAME#v}" --notes "See CHANGELOG.md for what changed."
+          else
+            echo "Release for $GITHUB_REF_NAME already exists ($existing)"
+          fi
 
       - name: Build, sign and upload installer
         shell: bash

@@ -33,7 +33,12 @@ export function initUpdater(onChange) {
   autoUpdater.on('update-available', (info) => set({ status: 'downloading', available: info.version, percent: 0 }))
   autoUpdater.on('download-progress', (p) => set({ status: 'downloading', percent: p.percent }))
   autoUpdater.on('update-downloaded', (info) => set({ status: 'ready', available: info.version, percent: 100 }))
-  autoUpdater.on('error', (err) => set({ status: 'error', error: String(err?.message || err).split('\n')[0] }))
+  autoUpdater.on('error', (err) => {
+    const message = String(err?.message || err)
+    // Before the first release is published (drafts only), GitHub has no "latest" to report.
+    if (/Unable to find latest version/i.test(message)) return set({ status: 'current', error: null })
+    set({ status: 'error', error: message.split('\n')[0] })
+  })
 
   const check = async () => {
     try {
