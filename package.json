@@ -1,0 +1,97 @@
+{
+  "name": "iv-downloader",
+  "productName": "IV Downloader",
+  "version": "0.1.0",
+  "description": "Infinite Variance video downloader, built on yt-dlp.",
+  "author": "Infinite Variance",
+  "private": true,
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "dist": "electron-vite build && electron-builder --win --x64 --publish never",
+    "release": "electron-vite build && electron-builder --win --x64 --publish always"
+  },
+  "dependencies": {
+    "deno": "2.9.6",
+    "electron-updater": "6.8.9",
+    "ffmpeg-ffprobe-static": "6.1.2-rc.1"
+  },
+  "devDependencies": {
+    "@fontsource/barlow": "5.3.0",
+    "@fontsource/dm-sans": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "electron": "44.9.0",
+    "electron-builder": "26.15.3",
+    "electron-vite": "6.0.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "vite": "8.3.4"
+  },
+  "homepage": "https://infinitevariance.ai",
+  "build": {
+    "appId": "ai.infinitevariance.downloader",
+    "productName": "IV Downloader",
+    "copyright": "© 2026 Infinite Variance",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "out/**/*",
+      "package.json",
+      "!**/node_modules/deno/deno.exe",
+      "!**/node_modules/deno/deno"
+    ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-ffprobe-static/**",
+      "node_modules/@deno/**"
+    ],
+    "extraResources": [
+      {
+        "from": "THIRD_PARTY_NOTICES.txt",
+        "to": "THIRD_PARTY_NOTICES.txt"
+      },
+      {
+        "from": "build/licenses",
+        "to": "licenses"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "IV Downloader",
+      "uninstallDisplayName": "IV Downloader",
+      "artifactName": "IV-Downloader-Setup.exe",
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "hollisorg",
+        "repo": "iv-downloader",
+        "releaseType": "draft"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hollisorg/iv-downloader.git"
+  }
+}

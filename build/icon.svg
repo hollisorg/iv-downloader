@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- IV Downloader app icon: the Infinite Variance boxed "IV" mark with the pink "keep it." dot -->
+  <rect width="1024" height="1024" rx="224" fill="#100c0e"/>
+  <rect x="212" y="212" width="600" height="600" fill="none" stroke="#f1ede5" stroke-width="44"/>
+  <rect x="318" y="350" width="84" height="324" fill="#f1ede5"/>
+  <polygon points="448,350 540,350 600,566 660,350 752,350 648,674 552,674" fill="#f1ede5"/>
+  <circle cx="812" cy="812" r="78" fill="#f19dac"/>
+</svg>
