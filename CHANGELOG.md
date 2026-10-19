@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (2026-10-19, unsigned test release)
+
+- New Infinite Variance app icon.
+- The release workflow creates the draft before uploading, so every installer file lands in one release.
+
 ## 0.1.0 (2026-10-19, unsigned test release)
 
 First release of IV Downloader, the Infinite Variance video downloader.

@@ -68,7 +68,7 @@ src/main/probe.js     link metadata (yt-dlp -J --flat-playlist)
 src/main/formats.js   picker choice -> yt-dlp arguments (built only in the main process)
 src/main/queue.js     download queue, progress parsing, cancel (kills ffmpeg too), save/resume
 src/main/index.js     window, settings (incl. sign-in), IPC
-build/                app icon (icon.svg -> icon.png) and bundled licence texts
+build/                app icon (icon-source.png -> icon.png) and bundled licence texts
 src/preload/index.js  window.iv API exposed to the UI
 src/renderer/src/     React UI (Infinite Variance palette: ink, paper, pink, red; Barlow, DM Sans, JetBrains Mono)
 ```
