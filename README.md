@@ -77,6 +77,11 @@ The renderer is sandboxed with context isolation and never builds command lines.
 choice, and the main process turns that choice into yt-dlp arguments. URLs must be http(s) and are
 passed after `--`.
 
+## Licence
+
+IV Downloader is MIT-licensed (see `LICENSE`). Bundled third-party tools keep their own licences;
+see `THIRD_PARTY_NOTICES.txt`. The bundled FFmpeg build is GPLv3.
+
 ## Not supported
 
 DRM-protected streaming services (Netflix, Prime Video, Disney+, Spotify and similar). iTubeGo ships

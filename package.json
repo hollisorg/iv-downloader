@@ -93,5 +93,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/hollisorg/iv-downloader.git"
-  }
+  },
+  "license": "MIT"
 }

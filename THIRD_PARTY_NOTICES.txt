@@ -1,5 +1,6 @@
 IV Downloader
-(c) 2026 Infinite Variance. Free to use.
+(c) 2026 Infinite Variance. Released under the MIT licence:
+https://github.com/hollisorg/iv-downloader
 
 Only download videos and audio you have the right to save: your own work, content
 whose creator allows downloads, or material in the public domain or under a licence
