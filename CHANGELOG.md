@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- New: macOS app for Apple Silicon and Intel Macs (macOS 12 or later). It isn't signed with an Apple
+  Developer ID yet, so macOS asks you to approve it once, and new versions are offered as a download
+  link rather than installed automatically.
+- New: Safari sign-in on macOS.
+- Fixed: a narrow window showed a sideways scrollbar.
+- Fixed (macOS): cancelling a download now also stops the ffmpeg step behind it.
+
 ## 0.1.2 (2026-10-19, unsigned test release)
 
 - Fixed: Windows showed a blank app icon. The icon is now a classic Windows .ico that Explorer can read.

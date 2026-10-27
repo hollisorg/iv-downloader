@@ -1,9 +1,11 @@
 <p align="center">
-  <img src="docs/images/banner.png" alt="IV Downloader: a free video and audio downloader for Windows" width="100%">
+  <img src="docs/images/banner.png" alt="IV Downloader: a free video and audio downloader for Windows and Mac" width="100%">
 </p>
 
 <p align="center">
   <a href="https://github.com/hollisorg/iv-downloader/releases/latest/download/IV-Downloader-Setup.exe"><b>Download for Windows</b></a>
+  &nbsp;·&nbsp;
+  <a href="#macos"><b>Download for Mac</b></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/hollisorg/iv-downloader/releases/latest">Release notes</a>
   &nbsp;·&nbsp;
@@ -50,6 +52,8 @@ that [yt-dlp](https://github.com/yt-dlp/yt-dlp) supports. Paste a link, pick a f
 
 ## Install
 
+### Windows
+
 1. [Download `IV-Downloader-Setup.exe`](https://github.com/hollisorg/iv-downloader/releases/latest/download/IV-Downloader-Setup.exe)
    (Windows 10 or 11, 64-bit, about 200 MB).
 2. Run it. The installer isn't code-signed yet, so Windows may show **"Windows protected your PC"**.
@@ -57,8 +61,22 @@ that [yt-dlp](https://github.com/yt-dlp/yt-dlp) supports. Paste a link, pick a f
 3. It installs for your user only, with no admin rights needed, and adds Start menu and desktop shortcuts.
    Downloads go to `Downloads\IV Downloads` unless you pick another folder.
 
-On first launch the app fetches the latest `yt-dlp.exe` (about 18 MB) and keeps it in
-`%APPDATA%\IV Downloader\bin`.
+### macOS
+
+1. Download the build for your Mac (macOS 12 or later):
+   [Apple Silicon (M1 and later)](https://github.com/hollisorg/iv-downloader/releases/latest/download/IV-Downloader-mac-arm64.dmg)
+   or [Intel](https://github.com/hollisorg/iv-downloader/releases/latest/download/IV-Downloader-mac-x64.dmg).
+   Not sure? Apple menu → **About This Mac**: "Chip: Apple M…" means Apple Silicon.
+2. Open the .dmg and drag **IV Downloader** into **Applications**.
+3. The app isn't signed with an Apple Developer ID yet, so the first open shows
+   **"Apple could not verify IV Downloader is free of malware"**. Click **Done**, then open
+   **System Settings → Privacy & Security**, scroll down and click **Open Anyway**. You only do this once.
+
+Downloads go to `Downloads/IV Downloads`. The Mac app tells you when a new version is out and links
+here, rather than updating itself.
+
+On first launch the app fetches the latest yt-dlp (about 23 MB on Windows, 36 MB on macOS) into its
+own app-data folder.
 
 Only download what you have the right to download.
 
@@ -84,9 +102,15 @@ npm run dist
 
 This writes `dist\IV-Downloader-Setup.exe`, a per-user NSIS installer. ffmpeg, ffprobe and Deno are
 unpacked next to `app.asar`; yt-dlp is fetched on first run. The installer is about 210 MB, mostly
-ffmpeg, ffprobe and Deno. Releases are built and uploaded by GitHub Actions when a version tag is
-pushed; see [docs/RELEASING.md](docs/RELEASING.md). Signing is covered in
-[docs/CODE-SIGNING.md](docs/CODE-SIGNING.md).
+ffmpeg, ffprobe and Deno.
+
+On a Mac, `npm run dist:mac` builds `dist/IV-Downloader-mac-<arch>.dmg` and `.zip` for that Mac's
+architecture (`npm ci` fetches ffmpeg and Deno for the machine it runs on, so build each architecture
+on its own kind of Mac). CI does this on GitHub's Apple Silicon and Intel runners, then launches each
+app and downloads a clip through it (`scripts/smoke-test.mjs`).
+
+Releases are built and uploaded by GitHub Actions when a version tag is pushed; see
+[docs/RELEASING.md](docs/RELEASING.md). Signing is covered in [docs/CODE-SIGNING.md](docs/CODE-SIGNING.md).
 
 ### Layout
 
@@ -109,8 +133,9 @@ passed after `--`.
 
 ### Still to do
 
-- Code signing (Azure Artifact Signing; see [docs/CODE-SIGNING.md](docs/CODE-SIGNING.md)).
-- macOS and Linux builds.
+- Code signing: Azure Artifact Signing for Windows, an Apple Developer ID and notarization for macOS
+  (see [docs/CODE-SIGNING.md](docs/CODE-SIGNING.md)).
+- Linux builds.
 
 ## Licence
 

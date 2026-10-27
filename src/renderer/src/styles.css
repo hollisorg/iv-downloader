@@ -948,6 +948,7 @@ button.frow-on:hover {
   }
   .stage {
     overflow: visible;
+    overflow-x: clip; /* the rings in .field would otherwise widen the page */
     border-right: 0;
   }
   .queue {

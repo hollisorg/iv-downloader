@@ -59,18 +59,19 @@ jobs:
       - run: npx electron-vite build
 
       # Ad-hoc signed ("-"): enough for macOS to run it. Not a Developer ID signature, so Gatekeeper
-      # still asks people to approve it on first open.
-      - run: npx electron-builder --mac --${{ matrix.arch }} --publish never -c.mac.identity=-
+      # still asks people to approve it on first open. Hardened runtime is for notarized builds only;
+      # with an ad-hoc signature its library validation can stop the app from launching.
+      - run: npx electron-builder --mac --${{ matrix.arch }} --publish never -c.mac.identity=- -c.mac.hardenedRuntime=false
 
       - name: Bundled tools run
         run: |
           app="$(ls -d dist/mac*/IV\ Downloader.app)"
           u="$app/Contents/Resources/app.asar.unpacked/node_modules"
-          "$u/ffmpeg-ffprobe-static/ffmpeg" -hide_banner -version | head -1
+          "$u/ffmpeg-ffprobe-static/ffmpeg" -hide_banner -version | head -3
           "$u/ffmpeg-ffprobe-static/ffprobe" -hide_banner -version | head -1
           "$u/@deno/darwin-${{ matrix.arch }}/deno" --version | head -1
-          cat "$u/ffmpeg-ffprobe-static/ffmpeg.README" || true
           test -f "$app/Contents/Resources/THIRD_PARTY_NOTICES.txt"
+          find "$app" -maxdepth 3 -iname '*licen*' -print
           codesign --verify --deep --strict --verbose=2 "$app"
           codesign -dv "$app" 2>&1 | grep -E 'Signature|Identifier|flags'
           lipo -archs "$app/Contents/MacOS/IV Downloader"
