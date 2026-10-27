@@ -1,8 +1,11 @@
 import { bytes, duration } from '../format'
 
+const isMac = window.iv.platform === 'darwin'
+
 const BROWSERS = [
   ['firefox', 'Firefox'],
   ['chrome', 'Chrome'],
+  ...(isMac ? [['safari', 'Safari']] : []),
   ['edge', 'Edge'],
   ['brave', 'Brave'],
   ['opera', 'Opera'],
@@ -40,6 +43,12 @@ function SignIn({ settings, onSettings }) {
 
 function signInHint(signIn) {
   if (signIn?.mode !== 'browser' || signIn.browser === 'firefox') return null
+  if (signIn.browser === 'safari') {
+    return 'Safari keeps its cookies in a protected folder. Give IV Downloader Full Disk Access in System Settings → Privacy & Security, or use Firefox or a cookies.txt file.'
+  }
+  if (isMac) {
+    return 'macOS will ask to let IV Downloader use the browser’s saved key in your keychain. Click Allow. If sign-in still fails, use Firefox or a cookies.txt file.'
+  }
   return 'Chromium browsers lock their cookies while open and newer Chrome/Edge builds encrypt them. If sign-in fails, close the browser, or use Firefox or a cookies.txt file.'
 }
 

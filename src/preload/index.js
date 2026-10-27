@@ -7,6 +7,7 @@ const on = (channel) => (cb) => {
 }
 
 contextBridge.exposeInMainWorld('iv', {
+  platform: process.platform,
   engine: {
     status: () => ipcRenderer.invoke('engine:status'),
     install: () => ipcRenderer.invoke('engine:install'),

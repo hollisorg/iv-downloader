@@ -1,9 +1,9 @@
-# Every push and pull request: install, build, and package (without an installer or upload).
+# Every push and pull request: install, build, and package. Windows stops at the unpacked app; macOS
+# builds a real .dmg, launches it for a smoke test, and keeps it as a workflow artifact for 14 days.
 name: CI
 
 on:
   push:
-    branches: [main]
   pull_request:
 
 permissions:
@@ -35,3 +35,54 @@ jobs:
             if (-not (Test-Path $f)) { throw "Missing $f" }
           }
           'Packaged app contains ffmpeg, ffprobe, deno and notices.'
+
+  mac:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15 # Apple Silicon
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      # Installs this runner's own ffmpeg, ffprobe and deno binaries (darwin-arm64 or darwin-x64).
+      - run: npm ci
+      - run: npx electron-vite build
+
+      # Ad-hoc signed ("-"): enough for macOS to run it. Not a Developer ID signature, so Gatekeeper
+      # still asks people to approve it on first open.
+      - run: npx electron-builder --mac --${{ matrix.arch }} --publish never -c.mac.identity=-
+
+      - name: Bundled tools run
+        run: |
+          app="$(ls -d dist/mac*/IV\ Downloader.app)"
+          u="$app/Contents/Resources/app.asar.unpacked/node_modules"
+          "$u/ffmpeg-ffprobe-static/ffmpeg" -hide_banner -version | head -1
+          "$u/ffmpeg-ffprobe-static/ffprobe" -hide_banner -version | head -1
+          "$u/@deno/darwin-${{ matrix.arch }}/deno" --version | head -1
+          cat "$u/ffmpeg-ffprobe-static/ffmpeg.README" || true
+          test -f "$app/Contents/Resources/THIRD_PARTY_NOTICES.txt"
+          codesign --verify --deep --strict --verbose=2 "$app"
+          codesign -dv "$app" 2>&1 | grep -E 'Signature|Identifier|flags'
+          lipo -archs "$app/Contents/MacOS/IV Downloader"
+
+      - name: Smoke test the packaged app
+        run: node scripts/smoke-test.mjs "$(ls -d dist/mac*/IV\ Downloader.app)/Contents/MacOS/IV Downloader" smoke-${{ matrix.arch }}.png
+
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: IV-Downloader-mac-${{ matrix.arch }}
+          path: |
+            dist/IV-Downloader-mac-${{ matrix.arch }}.dmg
+            smoke-${{ matrix.arch }}.png
+          retention-days: 14

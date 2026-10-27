@@ -96,6 +96,13 @@ export default function Engine({ engine, onEngine }) {
 
 function AppVersion({ update }) {
   if (!update) return null
+  if (update.status === 'available') {
+    return (
+      <button className="link-btn mono update-ready" onClick={() => window.iv.app.installUpdate()}>
+        Get v{update.available} ↗
+      </button>
+    )
+  }
   if (update.status === 'ready') {
     return (
       <button className="link-btn mono update-ready" onClick={() => window.iv.app.installUpdate()}>

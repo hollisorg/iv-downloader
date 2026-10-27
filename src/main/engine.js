@@ -71,6 +71,8 @@ export function baseArgs() {
 export function runYtdlp(args, { onLine, signal } = {}) {
   const child = spawn(ytdlpPath(), [...baseArgs(), ...args], {
     windowsHide: true,
+    // macOS/Linux: own process group, so cancelling can stop the ffmpeg it starts too.
+    detached: process.platform !== 'win32',
     env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' }
   })
   if (signal) signal.addEventListener('abort', () => killTree(child), { once: true })
@@ -103,12 +105,16 @@ export function runYtdlp(args, { onLine, signal } = {}) {
   return { child, done }
 }
 
-// yt-dlp spawns ffmpeg; on Windows a plain kill leaves it running.
+// yt-dlp spawns ffmpeg; a plain kill leaves it running.
 export function killTree(child) {
   if (!child || child.exitCode !== null) return
   if (process.platform === 'win32') {
     spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true })
-  } else {
+    return
+  }
+  try {
+    process.kill(-child.pid, 'SIGTERM') // the whole process group
+  } catch {
     child.kill('SIGTERM')
   }
 }

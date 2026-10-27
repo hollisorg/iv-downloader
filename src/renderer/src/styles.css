@@ -93,6 +93,11 @@ button:disabled {
   border-bottom: 1px solid var(--line);
 }
 
+/* macOS: clear the traffic lights */
+[data-platform='darwin'] .titlebar {
+  padding-left: 84px;
+}
+
 .brand {
   display: flex;
   align-items: center;
