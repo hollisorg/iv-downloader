@@ -113,8 +113,10 @@ jobs:
           node-version: 24
           cache: npm
 
-      # Installs this runner's own ffmpeg, ffprobe and deno binaries (darwin-arm64 or darwin-x64).
+      # Installs this runner's own deno (darwin-arm64 or darwin-x64), then swaps the npm package's
+      # nonfree ffmpeg builds for pinned GPL ones.
       - run: npm ci
+      - run: node scripts/mac-ffmpeg.mjs
       - run: npx electron-vite build
 
       - name: Build, sign and notarize

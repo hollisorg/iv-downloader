@@ -6,6 +6,8 @@
   Developer ID yet, so macOS asks you to approve it once, and new versions are offered as a download
   link rather than installed automatically.
 - New: Safari sign-in on macOS.
+- The engine install no longer fails when GitHub's API limit is reached on a busy shared network;
+  it falls back to GitHub's plain download links.
 - Fixed: a narrow window showed a sideways scrollbar.
 - Fixed (macOS): cancelling a download now also stops the ffmpeg step behind it.
 

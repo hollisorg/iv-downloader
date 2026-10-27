@@ -20,13 +20,14 @@ FFmpeg 6.1.2 (ffmpeg.exe and ffprobe.exe)
   FFmpeg runs as a separate program; IV Downloader calls it the same way you would
   from a command line.
 
-FFmpeg on macOS (ffmpeg and ffprobe inside the app)
-  Licence: GNU General Public License v3. licenses/GPL-3.0.txt, licenses/FFmpeg-LICENSE.md
-  Apple Silicon: FFmpeg 6.1.1 static build from osxexperts.net
-                 Source code: https://github.com/FFmpeg/FFmpeg/tree/n6.1.1
-  Intel:         FFmpeg 7.1 static build from evermeet.cx
-                 Source code: https://github.com/FFmpeg/FFmpeg/tree/n7.1
-  Both arrive via the npm package ffmpeg-ffprobe-static 6.1.2-rc.1.
+FFmpeg 9.0.2 on macOS (ffmpeg and ffprobe inside the app)
+  Licence: GNU General Public License v3 (this build uses --enable-gpl --enable-version3)
+  Licence text: licenses/GPL-3.0.txt, licenses/FFmpeg-LICENSE.md
+  Build: Martin Riedl's static release builds for Apple Silicon and Intel,
+         https://ffmpeg.martin-riedl.de (the full configuration and library list is in
+         versions.txt next to each download there)
+  Source code: https://github.com/FFmpeg/FFmpeg/tree/n9.0.2
+               https://gitlab.com/martinr92/ffmpeg (build scripts)
 
 Deno 2.9.6 (deno.exe, or deno on macOS)
   Licence: MIT. licenses/Deno-MIT.txt

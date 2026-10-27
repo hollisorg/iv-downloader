@@ -105,8 +105,9 @@ unpacked next to `app.asar`; yt-dlp is fetched on first run. The installer is ab
 ffmpeg, ffprobe and Deno.
 
 On a Mac, `npm run dist:mac` builds `dist/IV-Downloader-mac-<arch>.dmg` and `.zip` for that Mac's
-architecture (`npm ci` fetches ffmpeg and Deno for the machine it runs on, so build each architecture
-on its own kind of Mac). CI does this on GitHub's Apple Silicon and Intel runners, then launches each
+architecture (`npm ci` fetches Deno for the machine it runs on, so build each architecture on its own
+kind of Mac). It first runs `scripts/mac-ffmpeg.mjs`, which replaces the npm package's Mac ffmpeg
+(built with nonfree parts, so not redistributable) with pinned, checksum-verified GPL builds. CI does this on GitHub's Apple Silicon and Intel runners, then launches each
 app and downloads a clip through it (`scripts/smoke-test.mjs`).
 
 Releases are built and uploaded by GitHub Actions when a version tag is pushed; see
