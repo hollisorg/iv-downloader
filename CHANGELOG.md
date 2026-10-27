@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2026-10-27, unsigned release)
 
 - New: macOS app for Apple Silicon and Intel Macs (macOS 12 or later). It isn't signed with an Apple
   Developer ID yet, so macOS asks you to approve it once, and new versions are offered as a download
