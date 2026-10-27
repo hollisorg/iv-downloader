@@ -1,6 +1,6 @@
-# Builds, signs and uploads the Windows installer when a version tag is pushed (e.g. v0.2.0).
-# The result is a DRAFT GitHub release: review it, then click Publish. Installed apps only see
-# published releases, so nothing reaches users until then.
+# Builds, signs and uploads the Windows installer and the macOS apps (Apple Silicon and Intel) when a
+# version tag is pushed (e.g. v0.2.0). The result is a DRAFT GitHub release: review it, then click
+# Publish. Installed apps only see published releases, so nothing reaches users until then.
 name: Release
 
 on:
@@ -11,20 +11,14 @@ permissions:
   contents: write
 
 jobs:
-  windows:
-    runs-on: windows-latest
+  # Create the one draft up front. electron-builder only builds; each platform uploads its files to
+  # this draft after its signature check (electron-builder's own publishing could open a second draft).
+  draft:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: npm
-
-      - run: npm ci
-
       - name: Tag matches package.json version
-        shell: bash
         run: |
           expected="v$(node -p "require('./package.json').version")"
           if [ "$GITHUB_REF_NAME" != "$expected" ]; then
@@ -32,12 +26,7 @@ jobs:
             exit 1
           fi
 
-      - run: npx electron-vite build
-
-      # Create the one draft up front. electron-builder only builds; the files are uploaded to this
-      # draft after the signature check (its own publishing could open a second draft).
       - name: Create the draft release
-        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -48,10 +37,23 @@ jobs:
             echo "Release for $GITHUB_REF_NAME already exists ($existing)"
           fi
 
-      - name: Build, sign and upload installer
+  windows:
+    needs: draft
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npx electron-vite build
+
+      - name: Build and sign installer
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Azure Artifact Signing (formerly Trusted Signing). See docs/CODE-SIGNING.md.
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -92,3 +94,98 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "$GITHUB_REF_NAME" dist/IV-Downloader-Setup.exe dist/IV-Downloader-Setup.exe.blockmap dist/latest.yml --clobber
+
+  mac:
+    needs: draft
+    strategy:
+      matrix:
+        include:
+          - runner: macos-15 # Apple Silicon
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      # Installs this runner's own deno (darwin-arm64 or darwin-x64), then swaps the npm package's
+      # nonfree ffmpeg builds for pinned GPL ones.
+      - run: npm ci
+      - run: node scripts/mac-ffmpeg.mjs
+      - run: npx electron-vite build
+
+      - name: Build, sign and notarize
+        env:
+          # Apple Developer ID. See docs/CODE-SIGNING.md.
+          CSC_LINK: ${{ secrets.MAC_CERT_P12_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ALLOW_UNSIGNED: ${{ vars.ALLOW_UNSIGNED }}
+        run: |
+          args=(--mac --${{ matrix.arch }} --publish never)
+          if [ -n "$CSC_LINK" ] && [ -n "$APPLE_ID" ]; then
+            args+=(-c.mac.notarize=true)
+          elif [ "$ALLOW_UNSIGNED" = "true" ]; then
+            echo "::warning::Apple signing is not configured; uploading an ad-hoc signed build (ALLOW_UNSIGNED=true)."
+            unset CSC_LINK CSC_KEY_PASSWORD
+            # Hardened runtime is for notarized builds; with an ad-hoc signature it can block launch.
+            args+=(-c.mac.identity=- -c.mac.hardenedRuntime=false)
+          else
+            echo "::error::Apple signing is not configured. Set it up (docs/CODE-SIGNING.md) or set the repository variable ALLOW_UNSIGNED=true."
+            exit 1
+          fi
+          npx electron-builder "${args[@]}"
+
+      - name: Report signature
+        run: |
+          app="$(ls -d dist/mac*/IV\ Downloader.app)"
+          codesign --verify --deep --strict "$app"
+          codesign -dv "$app" 2>&1 | grep -E 'Authority|Signature|TeamIdentifier' || true
+          spctl --assess --type execute -v "$app" || echo "Gatekeeper: not notarized"
+
+      - name: Smoke test the packaged app
+        run: node scripts/smoke-test.mjs "$(ls -d dist/mac*/IV\ Downloader.app)/Contents/MacOS/IV Downloader"
+
+      - run: mv dist/latest-mac.yml dist/latest-mac-${{ matrix.arch }}.yml
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: mac-${{ matrix.arch }}
+          path: |
+            dist/IV-Downloader-mac-${{ matrix.arch }}.dmg
+            dist/IV-Downloader-mac-${{ matrix.arch }}.dmg.blockmap
+            dist/IV-Downloader-mac-${{ matrix.arch }}.zip
+            dist/IV-Downloader-mac-${{ matrix.arch }}.zip.blockmap
+            dist/latest-mac-${{ matrix.arch }}.yml
+
+  # One latest-mac.yml listing both architectures, so each Mac finds its own update.
+  mac-upload:
+    needs: mac
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: mac
+          merge-multiple: true
+
+      - name: Merge update files
+        working-directory: mac
+        run: |
+          awk '/^files:/{f=1;next} /^path:/{f=0} f' latest-mac-x64.yml > x64-files.txt
+          awk -v extra="$(cat x64-files.txt)" '/^path:/{print extra} {print}' latest-mac-arm64.yml > latest-mac.yml
+          cat latest-mac.yml
+
+      - name: Upload to the draft release
+        working-directory: mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --clobber \
+            IV-Downloader-mac-*.dmg IV-Downloader-mac-*.zip IV-Downloader-mac-*.blockmap latest-mac.yml

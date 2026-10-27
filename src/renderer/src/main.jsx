@@ -8,6 +8,9 @@ import '@fontsource/jetbrains-mono/400.css'
 import './styles.css'
 import App from './App'
 
+// Lets the stylesheet make room for macOS's traffic lights.
+document.documentElement.dataset.platform = window.iv.platform
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

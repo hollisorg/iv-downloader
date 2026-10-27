@@ -49,7 +49,7 @@ export default function Engine({ engine, onEngine }) {
             <p className="mono label">00 / The engine</p>
             <h2 className="title">Warming up.</h2>
             <p className="dim">
-              Fetching the latest official yt-dlp build (about 18 MB) and verifying its checksum. This happens once.
+              Fetching the latest official yt-dlp build and verifying its checksum. This happens once.
             </p>
             {progress && (
               <div className="bar">
@@ -96,6 +96,13 @@ export default function Engine({ engine, onEngine }) {
 
 function AppVersion({ update }) {
   if (!update) return null
+  if (update.status === 'available') {
+    return (
+      <button className="link-btn mono update-ready" onClick={() => window.iv.app.installUpdate()}>
+        Get v{update.available} ↗
+      </button>
+    )
+  }
   if (update.status === 'ready') {
     return (
       <button className="link-btn mono update-ready" onClick={() => window.iv.app.installUpdate()}>

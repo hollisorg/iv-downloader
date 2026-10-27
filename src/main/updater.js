@@ -1,11 +1,16 @@
 // App self-updates from GitHub Releases (latest.yml published next to the installer).
 // Updates download in the background; installing waits for the user, or happens on quit.
-import { app } from 'electron'
+import { app, shell } from 'electron'
 import electronUpdater from 'electron-updater'
 
 const { autoUpdater } = electronUpdater
 
 const SIX_HOURS = 6 * 60 * 60 * 1000
+
+// macOS only installs updates into an app signed with an Apple Developer ID. Until the Mac build is
+// signed, it reports new versions and sends people to the release page instead.
+const MANUAL = process.platform === 'darwin'
+const RELEASES = 'https://github.com/hollisorg/iv-downloader/releases/latest'
 
 let state = { status: 'idle', version: app.getVersion(), available: null, percent: null, error: null }
 
@@ -25,12 +30,14 @@ export function initUpdater(onChange) {
     return { check: async () => state, install: () => {} }
   }
 
-  autoUpdater.autoDownload = true
-  autoUpdater.autoInstallOnAppQuit = true
+  autoUpdater.autoDownload = !MANUAL
+  autoUpdater.autoInstallOnAppQuit = !MANUAL
 
   autoUpdater.on('checking-for-update', () => set({ status: 'checking', error: null }))
   autoUpdater.on('update-not-available', () => set({ status: 'current', available: null }))
-  autoUpdater.on('update-available', (info) => set({ status: 'downloading', available: info.version, percent: 0 }))
+  autoUpdater.on('update-available', (info) =>
+    set(MANUAL ? { status: 'available', available: info.version } : { status: 'downloading', available: info.version, percent: 0 })
+  )
   autoUpdater.on('download-progress', (p) => set({ status: 'downloading', percent: p.percent }))
   autoUpdater.on('update-downloaded', (info) => set({ status: 'ready', available: info.version, percent: 100 }))
   autoUpdater.on('error', (err) => {
@@ -55,6 +62,6 @@ export function initUpdater(onChange) {
   return {
     check,
     // The download queue is saved first, so anything in progress resumes after the restart.
-    install: () => autoUpdater.quitAndInstall(false, true)
+    install: () => (MANUAL ? shell.openExternal(RELEASES) : autoUpdater.quitAndInstall(false, true))
   }
 }

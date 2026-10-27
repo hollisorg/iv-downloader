@@ -10,7 +10,7 @@ import { initUpdater, updateState } from './updater'
 
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json')
 
-const BROWSERS = ['firefox', 'chrome', 'edge', 'brave', 'opera', 'vivaldi', 'chromium']
+const BROWSERS = ['firefox', 'chrome', 'safari', 'edge', 'brave', 'opera', 'vivaldi', 'chromium']
 
 const defaults = () => ({
   downloadDir: path.join(app.getPath('downloads'), 'IV Downloads'),
@@ -94,7 +94,10 @@ function createWindow() {
     backgroundColor: '#100c0e',
     title: 'IV Downloader',
     titleBarStyle: 'hidden',
-    titleBarOverlay: { color: '#100c0e', symbolColor: '#f1ede5', height: 40 },
+    // Windows draws its caption buttons over the page; macOS keeps its traffic lights, centred in the 40px bar.
+    ...(process.platform === 'darwin'
+      ? { trafficLightPosition: { x: 14, y: 13 } }
+      : { titleBarOverlay: { color: '#100c0e', symbolColor: '#f1ede5', height: 40 } }),
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -154,7 +157,8 @@ function registerIpc() {
   ipcMain.handle('update:state', () => updateState())
   ipcMain.handle('update:check', () => updater?.check())
   ipcMain.handle('update:install', () => {
-    queue.shutdown()
+    // On macOS this only opens the release page, so downloads keep running.
+    if (process.platform !== 'darwin') queue.shutdown()
     updater?.install()
   })
 

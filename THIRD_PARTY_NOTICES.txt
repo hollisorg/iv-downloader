@@ -20,11 +20,20 @@ FFmpeg 6.1.2 (ffmpeg.exe and ffprobe.exe)
   FFmpeg runs as a separate program; IV Downloader calls it the same way you would
   from a command line.
 
-Deno 2.9.6 (deno.exe)
+FFmpeg 9.0.2 on macOS (ffmpeg and ffprobe inside the app)
+  Licence: GNU General Public License v3 (this build uses --enable-gpl --enable-version3)
+  Licence text: licenses/GPL-3.0.txt, licenses/FFmpeg-LICENSE.md
+  Build: Martin Riedl's static release builds for Apple Silicon and Intel,
+         https://ffmpeg.martin-riedl.de (the full configuration and library list is in
+         versions.txt next to each download there)
+  Source code: https://github.com/FFmpeg/FFmpeg/tree/n9.0.2
+               https://gitlab.com/martinr92/ffmpeg (build scripts)
+
+Deno 2.9.6 (deno.exe, or deno on macOS)
   Licence: MIT. licenses/Deno-MIT.txt
   Source code: https://github.com/denoland/deno
 
-yt-dlp (yt-dlp.exe)
+yt-dlp (yt-dlp.exe, or yt-dlp_macos on macOS)
   Licence: The Unlicense (public domain)
   Not included in the installer. Downloaded on first run from the official release at
   https://github.com/yt-dlp/yt-dlp and verified against the published SHA-256 sums.
@@ -32,6 +41,7 @@ yt-dlp (yt-dlp.exe)
 Electron 44 and Chromium
   Licence: MIT (Electron) and the Chromium licences
   Licence text: LICENSE.electron.txt and LICENSES.chromium.html in the install folder
+                (on macOS, inside the app bundle)
   Source code: https://github.com/electron/electron
 
 React and React DOM 19

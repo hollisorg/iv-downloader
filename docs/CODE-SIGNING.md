@@ -1,4 +1,9 @@
-# Code signing with Azure Artifact Signing
+# Code signing
+
+Windows is signed with Azure Artifact Signing (below). macOS needs an Apple Developer ID; see
+[macOS](#macos-apple-developer-id) at the end.
+
+## Windows: Azure Artifact Signing
 
 Signing puts a verified publisher name on the installer and app, so Windows SmartScreen stops
 showing "Windows protected your PC / Unknown publisher". Microsoft's service for this is
@@ -75,3 +80,44 @@ SmartScreen warning and can click *More info → Run anyway*. Remove the variabl
   until enough people have installed the app.
 - Signing doesn't stop antivirus false positives on downloader tools, though it makes them rarer. If
   one happens, submit the file to the vendor (Microsoft: https://www.microsoft.com/wdsi/filesubmission).
+
+## macOS: Apple Developer ID
+
+Until the Mac app is signed with a Developer ID and notarized by Apple, the release workflow
+publishes it **ad-hoc signed** (when `ALLOW_UNSIGNED` is `true`). It runs, but:
+
+- macOS blocks the first open with *"Apple could not verify IV Downloader is free of malware"*.
+  People click **Done**, then open **System Settings → Privacy & Security**, scroll down and click
+  **Open Anyway** next to IV Downloader. This only has to happen once.
+- The app can't update itself. It shows **Get vX ↗** in the status bar, which opens the release page.
+
+Signing and notarizing removes both. It needs a paid **Apple Developer Program** membership
+(individual or organization; check the current price at developer.apple.com/programs). An organization
+membership needs a D-U-N-S number and shows the business name.
+
+### Steps (you do these; they need your Apple account and payment)
+
+1. **Join the Apple Developer Program** at developer.apple.com/programs/enroll. Note the **Team ID**
+   (Membership details).
+2. **Create a Developer ID Application certificate.** On a Mac, in Xcode → Settings → Accounts →
+   Manage Certificates → **+** → *Developer ID Application*. (Without a Mac: create a certificate
+   signing request with OpenSSL and upload it at developer.apple.com → Certificates.)
+3. **Export it as a .p12** with a password (Keychain Access → right-click the certificate → Export).
+   Base64-encode the file: `base64 -i cert.p12 | pbcopy` on a Mac, or
+   `[Convert]::ToBase64String([IO.File]::ReadAllBytes('cert.p12'))` in PowerShell.
+4. **App-specific password** for notarization: appleid.apple.com → Sign-In and Security →
+   App-Specific Passwords.
+
+### Hand-off to the repository
+
+Secrets (*Settings → Secrets and variables → Actions*):
+| Name | Value |
+|---|---|
+| `MAC_CERT_P12_BASE64` | The base64 text of the .p12 |
+| `MAC_CERT_PASSWORD` | The .p12 export password |
+| `APPLE_ID` | The Apple ID email of the developer account |
+| `APPLE_APP_SPECIFIC_PASSWORD` | The app-specific password |
+| `APPLE_TEAM_ID` | The Team ID |
+
+The next tagged release then signs and notarizes both Mac builds. After that, flip `MANUAL` in
+`src/main/updater.js` to `false` so Macs install updates themselves like Windows does.

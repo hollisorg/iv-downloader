@@ -12,6 +12,7 @@ import path from 'node:path'
 const nodeRequire = createRequire(__filename)
 
 const RELEASE_API = 'https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest'
+const RELEASE_DOWNLOAD = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download'
 
 const ASSET_BY_PLATFORM = {
   win32: 'yt-dlp.exe',
@@ -71,6 +72,8 @@ export function baseArgs() {
 export function runYtdlp(args, { onLine, signal } = {}) {
   const child = spawn(ytdlpPath(), [...baseArgs(), ...args], {
     windowsHide: true,
+    // macOS/Linux: own process group, so cancelling can stop the ffmpeg it starts too.
+    detached: process.platform !== 'win32',
     env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' }
   })
   if (signal) signal.addEventListener('abort', () => killTree(child), { once: true })
@@ -103,12 +106,16 @@ export function runYtdlp(args, { onLine, signal } = {}) {
   return { child, done }
 }
 
-// yt-dlp spawns ffmpeg; on Windows a plain kill leaves it running.
+// yt-dlp spawns ffmpeg; a plain kill leaves it running.
 export function killTree(child) {
   if (!child || child.exitCode !== null) return
   if (process.platform === 'win32') {
     spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true })
-  } else {
+    return
+  }
+  try {
+    process.kill(-child.pid, 'SIGTERM') // the whole process group
+  } catch {
     child.kill('SIGTERM')
   }
 }
@@ -138,6 +145,42 @@ async function fetchOk(url, opts) {
   return res
 }
 
+// Where the latest release's binary and checksum list live. The API is tried first; it allows
+// 60 anonymous requests an hour per IP, so on busy shared networks fall back to the plain
+// /releases/latest/download/ links, which redirect to the current tag.
+async function latestRelease(assetName) {
+  try {
+    const release = await (
+      await fetchOk(RELEASE_API, { headers: { Accept: 'application/vnd.github+json' } })
+    ).json()
+    const asset = release.assets.find((a) => a.name === assetName)
+    const sums = release.assets.find((a) => a.name === 'SHA2-256SUMS')
+    if (!asset || !sums) throw new Error('Release is missing the expected files')
+    return { tag: release.tag_name, assetUrl: asset.browser_download_url, size: asset.size, sumsUrl: sums.browser_download_url }
+  } catch (err) {
+    if (!/^(403|429) /.test(err.message)) throw err
+    const target = await redirectTarget(`${RELEASE_DOWNLOAD}/SHA2-256SUMS`)
+    const tag = target?.match(/\/releases\/download\/([^/]+)\//)?.[1]
+    if (!tag) throw new Error('Could not find the latest yt-dlp release')
+    const base = `https://github.com/yt-dlp/yt-dlp/releases/download/${tag}`
+    return { tag, assetUrl: `${base}/${assetName}`, size: 0, sumsUrl: `${base}/SHA2-256SUMS` }
+  }
+}
+
+// net.fetch hides where a redirect went; net.request reports it before following.
+function redirectTarget(url) {
+  return new Promise((resolve, reject) => {
+    const req = net.request({ url, redirect: 'manual' })
+    req.on('redirect', (_status, _method, redirectUrl) => {
+      resolve(redirectUrl)
+      req.abort()
+    })
+    req.on('response', () => resolve(null))
+    req.on('error', reject)
+    req.end()
+  })
+}
+
 // Download the latest official yt-dlp build, verify it against the release's
 // SHA2-256SUMS, and swap it in atomically. Skips the download when already current.
 // Returns the installed version tag.
@@ -146,26 +189,21 @@ export async function installLatest(onProgress = () => {}, currentVersion = null
   if (!assetName) throw new Error(`No yt-dlp build for ${process.platform}`)
 
   onProgress({ phase: 'checking', percent: 0 })
-  const release = await (
-    await fetchOk(RELEASE_API, { headers: { Accept: 'application/vnd.github+json' } })
-  ).json()
-  if (currentVersion && currentVersion === release.tag_name) {
+  const release = await latestRelease(assetName)
+  if (currentVersion && currentVersion === release.tag) {
     onProgress({ phase: 'done', percent: 100 })
-    return release.tag_name
+    return release.tag
   }
-  const asset = release.assets.find((a) => a.name === assetName)
-  const sums = release.assets.find((a) => a.name === 'SHA2-256SUMS')
-  if (!asset || !sums) throw new Error('Release is missing the expected files')
 
-  const sumsText = await (await fetchOk(sums.browser_download_url)).text()
+  const sumsText = await (await fetchOk(release.sumsUrl)).text()
   const expected = sumsText
     .split(/\r?\n/)
     .map((l) => l.trim().split(/\s+/))
     .find(([, name]) => name === assetName)?.[0]
   if (!expected) throw new Error(`No checksum listed for ${assetName}`)
 
-  const res = await fetchOk(asset.browser_download_url)
-  const total = Number(res.headers.get('content-length')) || asset.size || 0
+  const res = await fetchOk(release.assetUrl)
+  const total = Number(res.headers.get('content-length')) || release.size || 0
   const hash = createHash('sha256')
   const chunks = []
   let received = 0
@@ -189,5 +227,5 @@ export async function installLatest(onProgress = () => {}, currentVersion = null
   fs.writeFileSync(tmp, Buffer.concat(chunks), { mode: 0o755 })
   fs.renameSync(tmp, ytdlpPath())
   onProgress({ phase: 'done', percent: 100 })
-  return release.tag_name
+  return release.tag
 }

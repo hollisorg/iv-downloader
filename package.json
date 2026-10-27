@@ -11,6 +11,7 @@
     "build": "electron-vite build",
     "start": "electron-vite preview",
     "dist": "electron-vite build && electron-builder --win --x64 --publish never",
+    "dist:mac": "node scripts/mac-ffmpeg.mjs && electron-vite build && electron-builder --mac --publish never",
     "release": "electron-vite build && electron-builder --win --x64 --publish always"
   },
   "dependencies": {
@@ -80,6 +81,19 @@
       "uninstallDisplayName": "IV Downloader",
       "artifactName": "IV-Downloader-Setup.exe",
       "deleteAppDataOnUninstall": false
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.video",
+      "artifactName": "IV-Downloader-mac-${arch}.${ext}",
+      "minimumSystemVersion": "12.0"
+    },
+    "dmg": {
+      "title": "IV Downloader"
     },
     "publish": [
       {
