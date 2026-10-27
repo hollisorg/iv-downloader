@@ -6,7 +6,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { runYtdlp, killTree, lastError } from './engine'
 import { argsForChoice, describeChoice } from './formats'
-import { validateUrl } from './probe'
+import { validateUrl, vimeoPlayerUrl, isVimeoLoginWall } from './probe'
 
 const PROGRESS = 'IVPROG '
 const POSTPROC = 'IVPOST '
@@ -218,9 +218,18 @@ export class DownloadQueue extends EventEmitter {
             /* file moved or renamed */
           }
         } else if (item.status !== 'canceled') {
+          const error = lastError(stderr)
+          // Playlist entries keep their vimeo.com page links; swap to the player link once.
+          const player = isVimeoLoginWall(error) && vimeoPlayerUrl(item.url)
+          if (player) {
+            item.url = player
+            item.status = 'queued'
+            item.stage = null
+            return
+          }
           item.status = 'error'
           item.stage = null
-          item.error = lastError(stderr)
+          item.error = error
         }
       })
       .catch((err) => {

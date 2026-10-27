@@ -14,6 +14,24 @@ export function validateUrl(raw) {
   return url.toString()
 }
 
+// yt-dlp can only read vimeo.com pages when logged in, but Vimeo's embed player still
+// serves the same public (or unlisted, with its hash) video without an account.
+export function vimeoPlayerUrl(raw) {
+  let u
+  try {
+    u = new URL(raw)
+  } catch {
+    return null
+  }
+  if (!/^(www\.)?vimeo\.com$/i.test(u.hostname)) return null
+  const m = u.pathname.match(/^\/(?:channels\/[^/]+\/|groups\/[^/]+\/videos\/|showcase\/\d+\/video\/)?(\d+)(?:\/([0-9a-f]+))?\/?$/i)
+  if (!m) return null
+  const hash = m[2] || u.searchParams.get('h')
+  return `https://player.vimeo.com/video/${m[1]}${hash ? `?h=${hash}` : ''}`
+}
+
+export const isVimeoLoginWall = (message) => /web client only works when logged-in/i.test(message)
+
 function slimFormat(f) {
   const hasVideo = f.vcodec && f.vcodec !== 'none'
   const hasAudio = f.acodec && f.acodec !== 'none'
@@ -43,14 +61,10 @@ function pickThumb(info) {
 
 export async function probe(rawUrl, extraArgs = []) {
   const url = validateUrl(rawUrl)
-  const { code, stdout, stderr } = await runYtdlp([
-    '-J',
-    '--flat-playlist',
-    '--no-warnings',
-    ...extraArgs,
-    '--',
-    url
-  ]).done
+  const read = (target) => runYtdlp(['-J', '--flat-playlist', '--no-warnings', ...extraArgs, '--', target]).done
+  let { code, stdout, stderr } = await read(url)
+  const player = code !== 0 && isVimeoLoginWall(lastError(stderr)) && vimeoPlayerUrl(url)
+  if (player) ({ code, stdout, stderr } = await read(player))
   if (code !== 0) throw new Error(lastError(stderr))
 
   const info = JSON.parse(stdout)

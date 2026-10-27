@@ -4,6 +4,8 @@ import LinkBar from './components/LinkBar'
 import Picker from './components/Picker'
 import Queue from './components/Queue'
 import Engine from './components/Engine'
+import ErrorNotice from './components/ErrorNotice'
+import { explain, stripIpc } from './errors'
 
 export default function App() {
   const [engine, setEngine] = useState(null)
@@ -20,14 +22,17 @@ export default function App() {
     return window.iv.queue.onChange(setItems)
   }, [])
 
+  const [lastUrl, setLastUrl] = useState('')
+
   const fetchLink = useCallback(async (url) => {
+    setLastUrl(url)
     setProbing(true)
     setError(null)
     setInfo(null)
     try {
       setInfo(await window.iv.probe(url))
     } catch (err) {
-      setError(cleanError(err))
+      setError(explain(stripIpc(err), url))
     } finally {
       setProbing(false)
     }
@@ -38,7 +43,7 @@ export default function App() {
       await window.iv.queue.add(requests)
       setInfo(null)
     } catch (err) {
-      setError(cleanError(err))
+      setError(explain(stripIpc(err), requests[0]?.url))
     }
   }, [])
 
@@ -68,10 +73,13 @@ export default function App() {
             <LinkBar disabled={!ready} busy={probing} onSubmit={fetchLink} />
 
             {error && (
-              <div className="notice" role="alert">
-                <span className="mono">Signal lost</span>
-                <p>{error}</p>
-              </div>
+              <ErrorNotice
+                key={error.detail}
+                error={error}
+                settings={settings}
+                onSettings={setSettings}
+                onRetry={() => fetchLink(lastUrl)}
+              />
             )}
 
             {probing && <Scanning />}
@@ -108,12 +116,4 @@ function Scanning() {
       <span className="mono">Reading the signal…</span>
     </div>
   )
-}
-
-function cleanError(err) {
-  const msg = String(err?.message || err).replace(/^Error invoking remote method '[^']+': (Error: )?/, '')
-  if (/sign in|log ?in|private video|members|age[- ](restricted|gated)|confirm your age|cookies/i.test(msg)) {
-    return `${msg} — turn on Sign-in in the queue panel to use your browser login.`
-  }
-  return msg
 }

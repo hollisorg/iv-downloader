@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1 (2026-10-27, unsigned release)
+
+- Fixed: public Vimeo links said "The web client only works when logged-in". The app now opens them
+  through Vimeo's player link, which needs no account. Unlisted links and Vimeo playlists work too.
+- Clearer errors: when a link fails, the app says what happened in plain words and what to do next,
+  with the original message under "Technical details".
+- When a site wants you signed in, the error has a "Use my login from [browser]" picker and a
+  Try again button, so you don't have to find the Sign-in setting yourself.
+
 ## 0.2.0 (2026-10-27, unsigned release)
 
 - New: macOS app for Apple Silicon and Intel Macs (macOS 12 or later). It isn't signed with an Apple

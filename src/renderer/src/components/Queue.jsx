@@ -1,8 +1,9 @@
 import { bytes, duration } from '../format'
+import { explain } from '../errors'
 
 const isMac = window.iv.platform === 'darwin'
 
-const BROWSERS = [
+export const BROWSERS = [
   ['firefox', 'Firefox'],
   ['chrome', 'Chrome'],
   ...(isMac ? [['safari', 'Safari']] : []),
@@ -138,6 +139,15 @@ export default function Queue({ items, active, settings, onSettings }) {
   )
 }
 
+function QueueError({ item }) {
+  const { kind, title, body, detail } = explain(item.error, item.url)
+  return (
+    <p className="qerror" title={detail}>
+      {title} {kind === 'login' ? 'Set Sign-in above to the browser you’re logged in with, then Retry.' : body}
+    </p>
+  )
+}
+
 function QueueItem({ item }) {
   const { status, progress } = item
   const live = status === 'downloading' || status === 'processing'
@@ -177,7 +187,7 @@ function QueueItem({ item }) {
             <span style={{ width: `${percent ?? 0}%` }} />
           </div>
         )}
-        {status === 'error' && <p className="qerror">{item.error}</p>}
+        {status === 'error' && <QueueError item={item} />}
         <div className="qactions">
           {(live || status === 'queued') && (
             <button className="link-btn mono" onClick={() => window.iv.queue.cancel(item.id)}>
