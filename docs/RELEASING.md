@@ -19,8 +19,11 @@ Unfinished downloads are saved and resume after the restart.
    ```bash
    git push --follow-tags
    ```
-5. GitHub Actions (`.github/workflows/release.yml`) builds and signs the installer, then creates a
-   **draft** release with `IV-Downloader-Setup.exe`, its `.blockmap` and `latest.yml`.
+5. GitHub Actions (`.github/workflows/release.yml`) creates a **draft** release, then builds and
+   signs the Windows installer (`IV-Downloader-Setup.exe`, its `.blockmap`, `latest.yml`) and the
+   two Mac builds on Apple Silicon and Intel runners (`IV-Downloader-mac-arm64` / `-x64` `.dmg` and
+   `.zip`, their `.blockmap`s, and one `latest-mac.yml` covering both). Each Mac build is launched and
+   smoke-tested before it's uploaded.
 6. **Review the draft** on GitHub: download the installer, install it, check the publisher name and
    run one download. Paste the CHANGELOG entry into the release notes.
 7. **Publish** the release. Installed apps pick it up within six hours or on their next launch. The
