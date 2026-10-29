@@ -13,3 +13,8 @@ IV Downloader matches IV Studio and IV Chat. IV Studio uses the red liquid "What
 - `downloader-art-master.png`: the full-resolution pick (seed 101).
 - `src/renderer/src/assets/downloader-art.webp`: the app copy (WebP, quality 88), used in the page banners and at the bottom of the sidebar.
 - `src/renderer/src/assets/downloader-mark.png`: the centre object cut out as an oval, the title-bar logo.
+## App icon (2026-10-29)
+
+- Matches IV Studio and IV Chat. Same pipeline at 1024 × 1024, with IV Studio's `build/icon.png` as the reference (composited on #100c0e) and `icon-prompt.txt` as the prompt.
+- Seeds 11, 22 and 33 were rendered; 22 was picked because its shape reads best at small sizes. Master: `icon-master-seed-22.png`.
+- The rounded tile uses IV Studio's icon transparency exactly. The .ico has 32-bit BMP frames from 16 to 128 px and a PNG at 256, which Explorer shows correctly.
