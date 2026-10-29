@@ -46,7 +46,7 @@ export default function Engine({ engine, onEngine }) {
       {missing && (
         <div className="engine-gate">
           <div className="engine-card">
-            <p className="mono label">00 / The engine</p>
+            <p className="mono label">00 · The engine</p>
             <h2 className="title">Warming up.</h2>
             <p className="dim">
               Fetching the latest official yt-dlp build and verifying its checksum. This happens once.

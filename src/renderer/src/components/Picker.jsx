@@ -56,7 +56,7 @@ export default function Picker({ info, settings, onSettings, onAdd, onDismiss })
         </div>
         <div className="picker-meta">
           <p className="mono label">
-            {siteName(info.extractor) || hostOf(info.url)} {isPlaylist ? '/ Playlist' : info.isLive ? '/ Live' : ''}
+            {siteName(info.extractor) || hostOf(info.url)} {isPlaylist ? '· Playlist' : info.isLive ? '· Live' : ''}
           </p>
           <h2 className="title">{info.title}</h2>
           {info.uploader && <p className="by">{info.uploader}</p>}
@@ -66,7 +66,7 @@ export default function Picker({ info, settings, onSettings, onAdd, onDismiss })
         </button>
       </div>
 
-      <p className="mono label">02 / The format</p>
+      <p className="mono label">02 · The format</p>
 
       <div className="preset-groups">
         <PresetGroup name="Video" presets={presets} choice={choice} onChoose={setChoice} />

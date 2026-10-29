@@ -1,16 +1,18 @@
-/* Infinite Variance palette + type, from infinitevariance.ai */
+/* Infinite Variance palette and type, matching IV Studio and IV Chat */
 :root {
   --ink: #100c0e;
   --ink-2: #19131a;
   --ink-3: #241b22;
+  --deep: #0b0809;
   --line: rgba(241, 237, 229, 0.12);
   --line-strong: rgba(241, 237, 229, 0.28);
   --paper: #f1ede5;
-  --paper-dim: rgba(241, 237, 229, 0.56);
+  --paper-dim: rgba(241, 237, 229, 0.58);
+  --cream: #f4ecdc; /* the "What If?" lettering */
   --pink: #f19dac;
   --red: #f44859;
   --pad: clamp(24px, 4vw, 56px);
-  --display: 'Barlow', Impact, sans-serif;
+  --display: 'Barlow Condensed', 'Barlow', Impact, sans-serif;
   --body: 'DM Sans', Arial, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
   color-scheme: dark;
@@ -104,11 +106,11 @@ button:disabled {
   gap: 10px;
 }
 
-.brand-mark {
-  font: 600 13px/1 var(--display);
-  letter-spacing: 0.04em;
-  border: 1px solid var(--paper);
-  padding: 4px 5px 3px;
+.brand-logo {
+  height: 20px;
+  width: auto;
+  display: block;
+  -webkit-user-drag: none;
 }
 
 .layout {
@@ -132,25 +134,20 @@ button:disabled {
   max-width: 980px;
 }
 
-.field {
+/* the download artwork, fading in behind the headline like IV Studio's page banners */
+.stage-art {
   position: absolute;
-  top: -180px;
-  right: -220px;
-  width: 720px;
-  height: 720px;
+  top: -60px;
+  right: -330px;
+  width: 860px;
+  height: 430px;
+  background: url('./assets/downloader-art.webp') center / 100% 100% no-repeat;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, transparent 22%, #000 52%), linear-gradient(to top, transparent 0, #000 50%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent 0, transparent 22%, #000 52%), linear-gradient(to top, transparent 0, #000 50%);
+  mask-composite: intersect;
+  opacity: 0.75;
   pointer-events: none;
-  opacity: 0.9;
-  mask-image: radial-gradient(circle at 50% 50%, #000 40%, transparent 72%);
-}
-
-.field svg {
-  width: 100%;
-  height: 100%;
-}
-
-.field-rings {
-  transform-origin: center;
-  animation: drift 90s linear infinite;
 }
 
 @keyframes drift {
@@ -160,9 +157,11 @@ button:disabled {
 }
 
 .headline {
-  font: 600 clamp(72px, 11vw, 168px) / 0.84 var(--display);
-  letter-spacing: -0.04em;
+  font: 800 clamp(72px, 11vw, 168px) / 0.82 var(--display);
+  letter-spacing: -0.01em;
   text-transform: uppercase;
+  color: var(--cream);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
   margin: 0;
 }
 
@@ -268,7 +267,7 @@ button:disabled {
   padding: 10px 16px;
   background: transparent;
   border: 1px solid var(--line-strong);
-  font: 600 16px/1 var(--display);
+  font: 700 17px/1 var(--display);
   letter-spacing: 0.02em;
   text-transform: uppercase;
   transition:
@@ -472,7 +471,7 @@ button:disabled {
 }
 
 .title {
-  font: 600 30px/1.02 var(--display);
+  font: 700 32px/1 var(--display);
   letter-spacing: -0.01em;
   margin: 0;
   display: -webkit-box;
@@ -616,7 +615,6 @@ button.frow-on:hover {
   width: 32px;
   height: 18px;
   border: 1px solid var(--line-strong);
-  border-radius: 9px;
   position: relative;
   transition:
     background 0.15s,
@@ -630,7 +628,6 @@ button.frow-on:hover {
   left: 2px;
   width: 12px;
   height: 12px;
-  border-radius: 50%;
   background: var(--paper-dim);
   transition:
     transform 0.18s,
@@ -660,10 +657,29 @@ button.frow-on:hover {
 /* ---------- queue (right) ---------- */
 
 .queue {
+  position: relative;
   min-height: 0;
   display: flex;
   flex-direction: column;
   background: var(--ink-2);
+}
+
+/* a faint slice of the artwork at the bottom, like IV Studio's sidebar */
+.queue::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 220px;
+  background: url('./assets/downloader-art.webp') 20% 92% / auto 540px no-repeat;
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.32), transparent);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.32), transparent);
+  pointer-events: none;
+}
+
+.queue > * {
+  position: relative;
 }
 
 .queue-head {
@@ -678,9 +694,10 @@ button.frow-on:hover {
 }
 
 .queue-title {
-  font: 600 40px/0.9 var(--display);
+  font: 800 46px/0.86 var(--display);
   text-transform: uppercase;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  color: var(--cream);
   margin: 0;
 }
 
@@ -966,8 +983,11 @@ button.frow-on:hover {
 }
 
 .engine-card .title {
-  font-size: 44px;
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 0.9;
   text-transform: uppercase;
+  color: var(--cream);
   margin-bottom: 12px;
 }
 
@@ -989,12 +1009,14 @@ button.frow-on:hover {
     overflow-y: auto;
   }
   .stage {
-    overflow: visible;
-    overflow-x: clip; /* the rings in .field would otherwise widen the page */
+    overflow: clip; /* keeps the artwork from widening the page or spilling into the queue */
     border-right: 0;
   }
   .queue {
     border-top: 1px solid var(--line);
+  }
+  .queue::before {
+    display: none;
   }
   .queue-list {
     overflow: visible;

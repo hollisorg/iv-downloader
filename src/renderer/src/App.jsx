@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import Field from './components/Field'
+import mark from './assets/downloader-mark.png'
 import LinkBar from './components/LinkBar'
 import Picker from './components/Picker'
 import Queue from './components/Queue'
@@ -54,7 +54,7 @@ export default function App() {
     <div className="app">
       <header className="titlebar">
         <div className="brand">
-          <span className="brand-mark">IV</span>
+          <img className="brand-logo" src={mark} alt="" />
           <span className="mono">Infinite Variance</span>
           <span className="mono dim">/ Downloader</span>
         </div>
@@ -62,9 +62,9 @@ export default function App() {
 
       <main className="layout">
         <section className="stage">
-          <Field />
+          <div className="stage-art" aria-hidden="true" />
           <div className="stage-inner">
-            <p className="mono label">01 / The link</p>
+            <p className="mono label">01 · The link</p>
             <h1 className="headline">
               Keep it<span className="accent">.</span>
             </h1>

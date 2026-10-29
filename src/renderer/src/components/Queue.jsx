@@ -69,7 +69,7 @@ export default function Queue({ items, active, settings, onSettings }) {
     <aside className="queue">
       <div className="queue-head">
         <div>
-          <p className="mono label">03 / The queue</p>
+          <p className="mono label">03 · The queue</p>
           <h2 className="queue-title">
             {active ? (
               <>
