@@ -1,7 +1,7 @@
 {
   "name": "iv-downloader",
   "productName": "IV Downloader",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Infinite Variance video downloader, built on yt-dlp.",
   "author": "Infinite Variance",
   "private": true,
