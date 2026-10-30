@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2 (2026-10-29, unsigned release)
+
+- New look, matching IV Studio and IV Chat: original download artwork behind the headline and at the
+  foot of the queue, its mark in the title bar, cream condensed headings and square red switches.
+  The layout and every control are where they were.
+- New app icon in the same style.
+
 ## 0.2.1 (2026-10-27, unsigned release)
 
 - Fixed: public Vimeo links said "The web client only works when logged-in". The app now opens them
