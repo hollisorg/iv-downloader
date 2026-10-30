@@ -19,7 +19,7 @@ Instagram and the [1,000+ other sites](https://github.com/yt-dlp/yt-dlp/blob/mas
 that [yt-dlp](https://github.com/yt-dlp/yt-dlp) supports. Paste a link, pick a format, keep it.
 
 <p align="center">
-  <img src="docs/images/queue.png" alt="IV Downloader with a video ready to queue and three downloads in the queue" width="100%">
+  <img src="docs/images/queue.png" alt="IV Downloader with Agent 327 ready to queue, one film downloading and two saved" width="100%">
 </p>
 
 ## Features
@@ -41,12 +41,12 @@ that [yt-dlp](https://github.com/yt-dlp/yt-dlp) supports. Paste a link, pick a f
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/images/formats.png" alt="Format picker with Best, 2160p to 360p, MP3 and M4A"></td>
-    <td width="50%"><img src="docs/images/playlist.png" alt="Playlist picker with videos selected from a channel"></td>
+    <td width="50%"><img src="docs/images/start.png" alt="IV Downloader ready for a link, with an empty queue"></td>
+    <td width="50%"><img src="docs/images/playlist.png" alt="Playlist picker with five videos ticked from a channel, from Best down to 360p, MP3 or M4A"></td>
   </tr>
   <tr>
-    <td align="center"><sub>Choose the quality, or just the audio</sub></td>
-    <td align="center"><sub>Queue a whole playlist or channel</sub></td>
+    <td align="center"><sub>Paste a link to begin</sub></td>
+    <td align="center"><sub>Queue a whole playlist or channel, at any quality or as audio</sub></td>
   </tr>
 </table>
 
@@ -144,4 +144,5 @@ IV Downloader is MIT-licensed (see [LICENSE](LICENSE)). Bundled third-party tool
 licences; see `THIRD_PARTY_NOTICES.txt`, also available from **Licenses** in the app's status bar. The
 bundled FFmpeg build is GPLv3, and the notices link its exact source.
 
-Screenshots show [Blender Studio](https://studio.blender.org/) open movies (CC BY).
+Screenshots show [Blender Studio](https://studio.blender.org/) open movies (CC BY) and Blender Studio's
+YouTube channel.
