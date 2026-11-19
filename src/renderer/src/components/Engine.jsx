@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import NewsletterDialog from './NewsletterDialog'
 
 // Bottom status strip + first-run engine install.
 export default function Engine({ engine, onEngine }) {
@@ -8,6 +9,7 @@ export default function Engine({ engine, onEngine }) {
   const started = useRef(false)
 
   const [update, setUpdate] = useState(null)
+  const [newsletter, setNewsletter] = useState(false)
 
   useEffect(() => window.iv.engine.onProgress(setProgress), [])
   useEffect(() => {
@@ -81,6 +83,9 @@ export default function Engine({ engine, onEngine }) {
         ) : (
           <span className="dim rights">Only download what you have the right to</span>
         )}
+        <button className="link-btn mono" onClick={() => setNewsletter(true)}>
+          Newsletter
+        </button>
         <button className="link-btn mono" onClick={() => window.iv.openLicenses()}>
           Licenses
         </button>
@@ -90,6 +95,7 @@ export default function Engine({ engine, onEngine }) {
           </button>
         )}
       </footer>
+      <NewsletterDialog api={window.iv.newsletter} open={newsletter} onClose={() => setNewsletter(false)} />
     </>
   )
 }

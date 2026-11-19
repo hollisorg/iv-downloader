@@ -1,3 +1,4 @@
+import { createNewsletter, fileStore, registerNewsletter } from './newsletter'
 import { app, BrowserWindow, clipboard, dialog, ipcMain, shell } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -154,6 +155,9 @@ function installEngine() {
 }
 
 function registerIpc() {
+  // The IV Newsletter (src/main/newsletter.js, shared by every IV app): sends only an address typed and joined,
+  // keeps only the join date. IV_NEWSLETTER_URL points a test copy at a local stand-in.
+  registerNewsletter(ipcMain, shell, createNewsletter({ app: 'iv-downloader', version: app.getVersion(), store: fileStore(path.join(app.getPath('userData'), 'newsletter.json')) }))
   ipcMain.handle('update:state', () => updateState())
   ipcMain.handle('update:check', () => updater?.check())
   ipcMain.handle('update:install', () => {
