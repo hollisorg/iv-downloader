@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 (2026-11-19)
+
+- **Join The IV Newsletter.** A Newsletter link in the status bar opens a box to join The IV Newsletter: one
+  email a week from Matt about what's new in the IV apps, how things are made, and free tools. It's opt-in:
+  nothing is sent until you type your email and press Join. Kit, our email service, sends a confirm email
+  first, and you can unsubscribe any time. IV Downloader doesn't keep your address, and your settings,
+  queue and downloads are left exactly as they are.
+
 ## 0.2.2 (2026-10-29, unsigned release)
 
 - New look, matching IV Studio and IV Chat: original download artwork behind the headline and at the
